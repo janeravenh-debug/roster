@@ -264,20 +264,24 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 /* ── Mobile Responsive ──────────────────────────────── */
 @media(max-width:768px){
-  /* App layout: stack vertically, bottom nav */
-  .app{flex-direction:column}
-  .sidebar{display:none}  /* replaced by bottom nav */
-  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  /* Lock the viewport so only .page scrolls */
+  html,body{height:100%;overflow:hidden}
+  .app{flex-direction:column;height:100%;overflow:hidden}
+  .sidebar{display:none}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;
+        height:calc(100% - 64px)} /* subtract bottom nav */
 
   /* Topbar compact */
   .topbar{padding:12px 16px;gap:8px;flex-shrink:0}
   .topbar-title{font-size:15px}
   .topbar-sub{display:none}
-  .topbar-actions .btn-ghost{display:none} /* hide Export PDF on mobile */
+  .topbar-actions .btn-ghost{display:none}
   .btn-primary.btn-sm{padding:7px 12px;font-size:12px}
 
-  /* Pages: fill remaining height and scroll internally */
-  .page{padding:16px 16px 80px;overflow-y:auto;flex:1}
+  /* Page fills remaining space and scrolls on its own */
+  .page{padding:16px}
+  .page.on{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;
+            flex:1;padding-bottom:24px}
 
   /* Stats: 2 columns */
   .stats{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
@@ -305,7 +309,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   /* Forms */
   .r2,.r3{grid-template-columns:1fr}
 
-  /* Modal: full screen on mobile */
+  /* Modal: slide up from bottom */
   .modal-bg{padding:0;align-items:flex-end}
   .modal{border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:92vh;padding:20px 18px 32px}
 
