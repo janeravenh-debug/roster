@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Roster Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Base ───────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f0f0f;
+  --bg2:#171717;
+  --bg3:#222;
+  --bg4:#2a2a2a;
+  --border:#333;
+  --border2:#444;
+  --text:#f0f0f0;
+  --text2:#999;
+  --text3:#555;
+  --accent:#e8ff47;
+  --accent-dim:rgba(232,255,71,0.12);
+  --accent-dim2:rgba(232,255,71,0.06);
+  --green:#4ade80;
+  --green-dim:rgba(74,222,128,0.12);
+  --red:#f87171;
+  --red-dim:rgba(248,113,113,0.12);
+  --amber:#fbbf24;
+  --amber-dim:rgba(251,191,36,0.12);
+  --blue:#60a5fa;
+  --blue-dim:rgba(96,165,250,0.12);
+  --radius:10px;
+  --radius-lg:14px;
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+
+/* ── Layout ─────────────────────────────────────────── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+.sb-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.sb-logo-title{font-size:16px;font-weight:600;color:var(--text)}
+.sb-nav{padding:12px 10px;flex:1}
+.sb-section{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text3);padding:16px 10px 6px;text-transform:uppercase}
+.sb-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;background:none;color:var(--text2);border-radius:var(--radius);cursor:pointer;font-family:var(--sans);font-size:13px;text-align:left;transition:all 0.15s}
+.sb-btn:hover{background:var(--bg3);color:var(--text)}
+.sb-btn.on{background:var(--accent-dim);color:var(--accent)}
+.sb-btn .ic{font-size:15px;width:20px;text-align:center}
+.sb-week{padding:16px 20px;border-top:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text3)}
+.sb-week b{display:block;color:var(--accent);font-size:13px;margin-top:2px}
+
+/* ── Top bar ─────────────────────────────────────────── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.topbar-title{font-size:17px;font-weight:600}
+.topbar-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+
+/* ── Buttons ─────────────────────────────────────────── */
+.btn{padding:8px 16px;border-radius:var(--radius);border:none;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--accent);color:#0f0f0f}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg4)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.btn-danger:hover{background:rgba(248,113,113,0.2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-icon{padding:7px;border-radius:8px}
+
+/* ── Pages ─────────────────────────────────────────── */
+.page{display:none;flex:1;overflow-y:auto;padding:28px}
+.page.on{display:block}
+
+/* ── Cards ─────────────────────────────────────────── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px}
+.card-title{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:16px}
+
+/* ── Forms ─────────────────────────────────────────── */
+.field{margin-bottom:14px}
+.field label{font-size:12px;color:var(--text2);display:block;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--border2)}
+.field textarea{resize:vertical;min-height:70px}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* ── Stat grid ─────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px}
+.stat-label{font-size:11px;color:var(--text2);margin-bottom:6px}
+.stat-value{font-size:26px;font-weight:600;font-family:var(--mono)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.stat.accent .stat-value{color:var(--accent)}
+.stat.green .stat-value{color:var(--green)}
+.stat.amber .stat-value{color:var(--amber)}
+.stat.red .stat-value{color:var(--red)}
+
+/* ── Employee list ─────────────────────────────────── */
+.emp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.emp-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;transition:border-color 0.15s}
+.emp-card:hover{border-color:var(--border2)}
+.emp-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.emp-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0}
+.emp-name{font-weight:500;font-size:14px}
+.emp-role{font-size:12px;color:var(--text2)}
+.emp-meta{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;font-family:var(--mono)}
+.badge-green{background:var(--green-dim);color:var(--green)}
+.badge-amber{background:var(--amber-dim);color:var(--amber)}
+.badge-red{background:var(--red-dim);color:var(--red)}
+.badge-blue{background:var(--blue-dim);color:var(--blue)}
+.badge-accent{background:var(--accent-dim);color:var(--accent)}
+.emp-actions{display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+
+/* ── Roster grid ─────────────────────────────────────── */
+.roster-wrap{overflow-x:auto}
+.roster-table{width:100%;border-collapse:collapse;min-width:700px}
+.roster-table th{padding:10px 12px;text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.roster-table th.day-col{text-align:center;min-width:110px}
+.roster-table td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.roster-table tr:last-child td{border-bottom:none}
+.roster-table td.emp-cell{padding:10px 12px;white-space:nowrap}
+.emp-cell-name{font-weight:500;font-size:13px}
+.emp-cell-role{font-size:11px;color:var(--text2)}
+
+.shift-cell{position:relative}
+.shift-block{border-radius:8px;padding:5px 8px;text-align:center;cursor:pointer;transition:all 0.15s;min-height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.shift-block:hover{filter:brightness(1.1)}
+.shift-time{font-family:var(--mono);font-size:10px;font-weight:500}
+.shift-hours{font-size:10px;opacity:0.7}
+.shift-off{background:var(--bg3);color:var(--text3);border:1px dashed var(--border);font-size:11px}
+.shift-work{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(232,255,71,0.2)}
+.shift-leave{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,0.2)}
+
+/* ── Modal ─────────────────────────────────────────── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-bg.hidden{display:none}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--text2);margin-bottom:20px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* ── Availability flags ─────────────────────────────── */
+.avail-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.avail-row:last-child{border-bottom:none}
+.avail-day{font-weight:500;font-size:13px;width:90px}
+.avail-status{display:flex;gap:6px}
+.avail-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--text2);font-size:11px;cursor:pointer;font-family:var(--sans);transition:all 0.12s}
+.avail-btn.sel-avail{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.avail-btn.sel-off{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
+.avail-btn.sel-leave{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+
+/* ── Toast ─────────────────────────────────────────── */
+#toast{position:fixed;bottom:28px;right:28px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:12px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;z-index:999;opacity:0;transform:translateY(8px);transition:all 0.25s;pointer-events:none;max-width:300px}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.ok{border-color:rgba(74,222,128,0.4);color:var(--green)}
+#toast.err{border-color:rgba(248,113,113,0.4);color:var(--red)}
+
+/* ── Week nav ─────────────────────────────────────── */
+.week-nav{display:flex;align-items:center;gap:12px}
+.week-label{font-family:var(--mono);font-size:13px;color:var(--accent);min-width:160px;text-align:center}
+
+/* ── Empty state ─────────────────────────────────── */
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:36px;margin-bottom:12px}
+.empty-text{font-size:14px}
+
+/* ── Day-off requests ─────────────────────────────── */
+.req-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.req-row:last-child{border-bottom:none}
+.req-info{flex:1}
+.req-name{font-weight:500;font-size:13px}
+.req-detail{font-size:11px;color:var(--text2);margin-top:2px}
+.req-actions{display:flex;gap:6px}
+
+/* ── Password Screen ────────────────────────────────── */
+#lock-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+}
+.lock-box{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:40px 36px;
+  width:100%;max-width:360px;text-align:center;
+}
+.lock-logo{font-family:var(--mono);font-size:10px;letter-spacing:3px;
+  color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+.lock-title{font-size:20px;font-weight:600;margin-bottom:6px}
+.lock-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
+.lock-input-wrap{position:relative;margin-bottom:16px}
+.lock-input{
+  width:100%;padding:12px 42px 12px 16px;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);
+  font-family:var(--sans);font-size:15px;outline:none;
+  transition:border-color 0.15s;letter-spacing:2px;text-align:center;
+}
+.lock-input:focus{border-color:var(--border2)}
+.lock-input.err{border-color:var(--red);animation:shake 0.3s}
+.lock-btn{
+  width:100%;padding:12px;border-radius:var(--radius);
+  border:none;cursor:pointer;font-family:var(--sans);
+  font-size:14px;font-weight:600;
+  background:var(--accent);color:#0f0f0f;
+  transition:all 0.15s;
+}
+.lock-btn:hover{filter:brightness(1.08)}
+.lock-btn:active{transform:scale(0.98)}
+.lock-err{font-size:12px;color:var(--red);margin-top:10px;height:16px;transition:opacity 0.2s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* ── Print / PDF export ────────────────────────────── */
+@media print{
+  @page{size:A4 landscape;margin:12mm 10mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #lock-screen,#mobile-nav{display:none!important}
+  .sidebar,.topbar,.no-print,#toast{display:none!important}
+  .main,.app{display:block!important}
+  body{background:#fff!important;font-size:11px}
+  /* Show only dashboard page */
+  .page{display:none!important}
+  #pg-dashboard{display:block!important;padding:10px;overflow:visible}
+  /* Hide non-roster sections */
+  #dash-pending-card,#dash-stats{display:none!important}
+  .card{background:#fff!important;border:none!important;box-shadow:none!important;break-inside:avoid;padding:8px 0;margin-bottom:6px}
+  .card-title{color:#666!important;font-size:9px;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:8px}
+  /* Roster table */
+  .roster-table{font-size:10px;min-width:unset;width:100%}
+  .roster-table th{
+    color:#444!important;border-bottom:1.5px solid #bbb!important;
+    padding:5px 8px;background:#f5f5f5!important;font-size:9px
+  }
+  .roster-table td{border-bottom:1px solid #eee!important;padding:4px 6px}
+  .roster-table tr:last-child td{border-bottom:none!important}
+  /* Employee name cell - keep readable, not full black */
+  .emp-cell-name{font-size:11px!important;font-weight:600;color:#222!important}
+  .emp-cell-role{font-size:9px!important;color:#777!important}
+  /* Shift cells - light monochrome */
+  .shift-block{min-height:32px;padding:3px 5px;border-radius:5px}
+  .shift-work{background:#efefef!important;color:#222!important;border:1px solid #ccc!important}
+  .shift-leave{background:#e4e4e4!important;color:#555!important;border:1px solid #bbb!important}
+  .shift-off{background:transparent!important;color:#ccc!important;border:1px dashed #e0e0e0!important}
+  .shift-time{font-size:9px!important}
+  .shift-hours{font-size:8px!important;opacity:0.7}
+  .emp-avatar{display:none!important;background:transparent!important;border:none!important}
+  /* Ensure emp-cell has white background - no color bleed from avatar */
+  td.emp-cell{background:#fff!important}
+  td.emp-cell *{background:transparent!important}
+  .print-header{display:block!important}
+  .topbar-actions,.emp-actions,.btn{display:none!important}
+  /* Total hours column */
+  .hours-cell{color:#333!important;font-weight:600}
+}
+.print-header{display:none;margin-bottom:16px;border-bottom:2px solid #111;padding-bottom:10px}
+.print-header h1{font-size:18px;font-weight:700;color:#111}
+.print-header p{font-size:11px;color:#555;margin-top:2px}
+
+/* ── Mobile Responsive ──────────────────────────────── */
+@media(max-width:768px){
+  /* App layout: stack vertically, bottom nav */
+  .app{flex-direction:column;padding-bottom:64px}
+  .sidebar{display:none}  /* replaced by bottom nav */
+  .main{flex:1;min-height:0}
+
+  /* Topbar compact */
+  .topbar{padding:12px 16px;gap:8px}
+  .topbar-title{font-size:15px}
+  .topbar-sub{display:none}
+  .topbar-actions .btn-ghost{display:none} /* hide Export PDF on mobile */
+  .btn-primary.btn-sm{padding:7px 12px;font-size:12px}
+
+  /* Pages */
+  .page{padding:16px}
+
+  /* Stats: 2 columns */
+  .stats{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .stat{padding:12px 14px}
+  .stat-value{font-size:22px}
+
+  /* Cards */
+  .card{padding:14px;margin-bottom:12px}
+
+  /* Roster table: horizontal scroll with sticky first col */
+  .roster-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -14px;padding:0 14px}
+  .roster-table{font-size:11px;min-width:520px}
+  .roster-table th{padding:7px 6px;font-size:8px}
+  .roster-table td{padding:4px 4px}
+  .roster-table td.emp-cell{padding:8px 6px;position:sticky;left:0;background:var(--bg2);z-index:1;min-width:110px;max-width:110px}
+  .emp-cell-name{font-size:11px}
+  .emp-cell-role{font-size:9px}
+  .shift-block{min-height:36px;padding:3px 4px;border-radius:6px}
+  .shift-time{font-size:9px}
+  .shift-hours{font-size:8px}
+
+  /* Employee grid: single column */
+  .emp-grid{grid-template-columns:1fr}
+
+  /* Forms */
+  .r2,.r3{grid-template-columns:1fr}
+
+  /* Modal: full screen on mobile */
+  .modal-bg{padding:0;align-items:flex-end}
+  .modal{border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:92vh;padding:20px 18px 32px}
+
+  /* Requests */
+  .req-row{flex-wrap:wrap;gap:8px}
+  .req-actions{width:100%;justify-content:flex-end}
+
+  /* Avail row */
+  .avail-row{flex-wrap:wrap;gap:6px}
+  .avail-status{flex-wrap:wrap}
+}
+
+/* ── Bottom Nav (mobile only) ───────────────────────── */
+#mobile-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:0;z-index:500;
+  height:64px;
+}
+#mobile-nav ul{
+  display:flex;list-style:none;margin:0;padding:0;height:100%
+}
+#mobile-nav li{
+  flex:1;display:flex;
+}
+#mobile-nav button{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;border:none;background:none;
+  color:var(--text3);font-family:var(--sans);font-size:10px;
+  cursor:pointer;padding:8px 4px;transition:color 0.15s;position:relative;
+}
+#mobile-nav button .nav-ic{font-size:18px;line-height:1}
+#mobile-nav button.on{color:var(--accent)}
+#mobile-nav button .nav-badge{
+  position:absolute;top:10px;right:calc(50% - 14px);
+  background:var(--amber);color:#000;font-size:9px;
+  padding:1px 5px;border-radius:8px;font-family:var(--mono);
+  display:none;
+}
+@media(max-width:768px){
+  #mobile-nav{display:block}
+}
+</style>
+</head>
+<body>
+<!-- ── Lock Screen ──────────────────────────────────── -->
+<div id="lock-screen">
+  <div class="lock-box">
+    <div class="lock-logo">Roster Pro</div>
+    <div class="lock-title">Admin Access</div>
+    <div class="lock-sub">Enter your password to continue</div>
+    <div class="lock-input-wrap">
+      <input
+        class="lock-input"
+        id="lock-input"
+        type="password"
+        placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')checkPassword()"
+        autocomplete="current-password"
+      >
+    </div>
+    <button class="lock-btn" onclick="checkPassword()">Unlock</button>
+    <div class="lock-err" id="lock-err"></div>
+  </div>
+</div>
+
+<div class="app" id="main-app" style="display:none">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">Admin</div>
+    <div class="sb-logo-title">Roster Pro</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Workspace</div>
+    <button class="sb-btn on" onclick="goPage('dashboard',this)"><span class="ic">◈</span> Dashboard</button>
+    <button class="sb-btn" onclick="goPage('roster',this)"><span class="ic">▦</span> Weekly Roster</button>
+    <button class="sb-btn" onclick="goPage('requests',this)"><span class="ic">◷</span> Day-off Requests <span id="req-badge" style="display:none;margin-left:auto;background:var(--amber);color:#000;font-size:10px;padding:1px 6px;border-radius:10px;font-family:var(--mono)"></span></button>
+    <div class="sb-section">Setup</div>
+    <button class="sb-btn" onclick="goPage('employees',this)"><span class="ic">◉</span> Employees</button>
+    <button class="sb-btn" onclick="goPage('settings',this)"><span class="ic">◎</span> Settings</button>
+  </nav>
+  <div class="sb-week">
+    Current week<b id="sb-week-label">—</b>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <!-- Topbar -->
+  <div class="topbar no-print">
+    <div>
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-sub" id="page-sub">Overview of the upcoming roster</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="exportPDF()">⎙ Export PDF</button>
+      <button class="btn btn-primary btn-sm" onclick="publishRoster()">↑ Publish Roster</button>
+    </div>
+  </div>
+
+  <!-- ── Dashboard ─────────────────────────────────────── -->
+  <div id="pg-dashboard" class="page on">
+    <div class="print-header">
+      <h1>Roster — <span id="ph-week"></span></h1>
+      <p id="ph-company"></p>
+    </div>
+    <div class="stats" id="dash-stats"></div>
+    <div class="card">
+      <div class="card-title">Roster snapshot — <span id="dash-week-label"></span></div>
+      <div class="roster-wrap"><table class="roster-table" id="dash-table"></table></div>
+    </div>
+    <div class="card" id="dash-pending-card" style="display:none">
+      <div class="card-title">Pending day-off requests</div>
+      <div id="dash-pending-list"></div>
+    </div>
+  </div>
+
+  <!-- ── Weekly Roster ──────────────────────────────────── -->
+  <div id="pg-roster" class="page">
+    <div class="card no-print" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:gap">
+        <div class="card-title" style="margin-bottom:0">Select week to schedule</div>
+        <div class="week-nav">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="rosterWeekMove(-1)">‹</button>
+          <span class="week-label" id="roster-week-label"></span>
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="rosterWeekMove(1)">›</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="roster-wrap"><table class="roster-table" id="roster-table"></table></div>
+    </div>
+  </div>
+
+  <!-- ── Day-off Requests ───────────────────────────────── -->
+  <div id="pg-requests" class="page">
+    <div class="card">
+      <div class="card-title">Pending requests</div>
+      <div id="req-pending"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Resolved</div>
+      <div id="req-resolved"></div>
+    </div>
+  </div>
+
+  <!-- ── Employees ─────────────────────────────────────── -->
+  <div id="pg-employees" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px" class="no-print">
+      <div></div>
+      <button class="btn btn-primary" onclick="openAddEmployee()">+ Add Employee</button>
+    </div>
+    <div class="emp-grid" id="emp-grid"></div>
+  </div>
+
+  <!-- ── Settings ──────────────────────────────────────── -->
+  <div id="pg-settings" class="page">
+    <div class="card" style="max-width:500px">
+      <div class="card-title">Workplace settings</div>
+      <div class="field"><label>Business / Team name</label><input type="text" id="set-name" placeholder="e.g. The Corner Cafe"></div>
+      <div class="r2">
+        <div class="field"><label>Default shift start</label><input type="time" id="set-start" value="09:00"></div>
+        <div class="field"><label>Default shift end</label><input type="time" id="set-end" value="17:00"></div>
+      </div>
+      <div class="field"><label>Work week starts on</label>
+        <select id="set-weekstart">
+          <option value="1">Monday</option>
+          <option value="0">Sunday</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── Modals ─────────────────────────────────────────── -->
+
+<!-- Add/Edit Employee -->
+<div class="modal-bg hidden" id="modal-emp">
+  <div class="modal">
+    <div class="modal-title" id="modal-emp-title">Add Employee</div>
+    <div class="modal-sub">Fill in the employee details and set their weekly availability.</div>
+    <div class="r2">
+      <div class="field"><label>First name</label><input type="text" id="emp-fname" placeholder="Jane"></div>
+      <div class="field"><label>Last name</label><input type="text" id="emp-lname" placeholder="Smith"></div>
+    </div>
+    <div class="r2">
+      <div class="field"><label>Role / Position</label><input type="text" id="emp-role" placeholder="Barista, Manager…"></div>
+      <div class="field"><label>Employment type</label>
+        <select id="emp-type">
+          <option value="Full-time">Full-time</option>
+          <option value="Part-time">Part-time</option>
+          <option value="Casual">Casual</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Contact (email or phone)</label><input type="text" id="emp-contact" placeholder="jane@example.com"></div>
+    <div class="field"><label>Weekly availability</label>
+      <div id="emp-avail-grid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-emp')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEmployee()">Save Employee</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Shift -->
+<div class="modal-bg hidden" id="modal-shift">
+  <div class="modal">
+    <div class="modal-title" id="shift-modal-title">Edit Shift</div>
+    <div class="modal-sub" id="shift-modal-sub"></div>
+    <div class="field"><label>Shift type</label>
+      <select id="shift-type" onchange="toggleShiftType()">
+        <option value="work">Working</option>
+        <option value="off">Day Off</option>
+        <option value="leave">Leave / Annual</option>
+      </select>
+    </div>
+    <div id="shift-time-fields">
+      <div class="r2">
+        <div class="field"><label>Start time</label><input type="time" id="shift-start"></div>
+        <div class="field"><label>End time</label><input type="time" id="shift-end"></div>
+      </div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="shift-note" placeholder="e.g. Opening, Training…"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-shift')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveShift()">Save Shift</button>
+    </div>
+  </div>
+</div>
+
+<!-- Day-off request (employee view) -->
+<div class="modal-bg hidden" id="modal-request">
+  <div class="modal">
+    <div class="modal-title">Submit Day-off Request</div>
+    <div class="modal-sub">Select an employee and the date(s) they need off.</div>
+    <div class="field"><label>Employee</label><select id="req-emp"></select></div>
+    <div class="r2">
+      <div class="field"><label>From date</label><input type="date" id="req-from"></div>
+      <div class="field"><label>To date</label><input type="date" id="req-to"></div>
+    </div>
+    <div class="field"><label>Type</label>
+      <select id="req-type">
+        <option value="Annual leave">Annual leave</option>
+        <option value="Sick leave">Sick leave</option>
+        <option value="Unpaid leave">Unpaid leave</option>
+        <option value="Personal">Personal</option>
+      </select>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="req-notes" placeholder="Any additional context…"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-request')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRequest()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ── Mobile Bottom Nav ──────────────────────────────── -->
+<nav id="mobile-nav">
+  <ul>
+    <li><button class="on" onclick="goPage('dashboard',this)" id="mnav-dashboard">
+      <span class="nav-ic">◈</span><span>Dashboard</span>
+    </button></li>
+    <li><button onclick="goPage('roster',this)" id="mnav-roster">
+      <span class="nav-ic">▦</span><span>Roster</span>
+    </button></li>
+    <li><button onclick="goPage('requests',this)" id="mnav-requests">
+      <span class="nav-ic">◷</span><span>Requests</span>
+      <span class="nav-badge" id="mnav-badge"></span>
+    </button></li>
+    <li><button onclick="goPage('employees',this)" id="mnav-employees">
+      <span class="nav-ic">◉</span><span>Team</span>
+    </button></li>
+    <li><button onclick="goPage('settings',this)" id="mnav-settings">
+      <span class="nav-ic">◎</span><span>Settings</span>
+    </button></li>
+  </ul>
+</nav>
+
+</div><!-- end #main-app -->
+
+<script>
+// ── Password Protection ──────────────────────────────
+const ADMIN_PASSWORD = 'roster2024'; // ← 在此修改密码
+const SESSION_KEY = 'roster_unlocked';
+
+function checkPassword() {
+  const input = document.getElementById('lock-input');
+  const errEl = document.getElementById('lock-err');
+  const val = input.value;
+
+  if (val === ADMIN_PASSWORD) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'flex';
+    input.value = '';
+  } else {
+    input.classList.add('err');
+    errEl.textContent = 'Incorrect password. Please try again.';
+    setTimeout(() => { input.classList.remove('err'); input.value = ''; input.focus(); }, 600);
+  }
+}
+
+// Auto-unlock if already authenticated this session
+if (sessionStorage.getItem(SESSION_KEY) === '1') {
+  document.getElementById('lock-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'flex';
+} else {
+  setTimeout(() => document.getElementById('lock-input').focus(), 100);
+}
+
+// ── Data store ───────────────────────────────────────
+const SK = 'roster_admin_v1';
+let D = JSON.parse(localStorage.getItem(SK) || 'null') || {
+  settings: {name:'My Team', defaultStart:'09:00', defaultEnd:'17:00', weekStart:1},
+  employees: [],
+  shifts: {},     // key: "empId_YYYY-MM-DD"
+  requests: [],
+  published: {}   // key: weekStr
+};
+
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const COLORS = ['#60a5fa','#4ade80','#f472b6','#fb923c','#a78bfa','#34d399','#fbbf24','#f87171','#38bdf8','#c084fc'];
+
+let currentPage = 'dashboard';
+let rosterWeekOffset = 1; // default: next week
+let editingEmpId = null;
+let shiftContext = null; // {empId, date}
+
+// ── Persistence ──────────────────────────────────────
+const save = () => localStorage.setItem(SK, JSON.stringify(D));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+
+// ── Week helpers ─────────────────────────────────────
+function getWeekStart(offsetWeeks=0) {
+  const d = new Date();
+  const ws = parseInt(D.settings.weekStart || 1);
+  const day = d.getDay();
+  const diff = (day - ws + 7) % 7;
+  d.setDate(d.getDate() - diff + offsetWeeks * 7);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function weekDates(offsetWeeks=0) {
+  const start = getWeekStart(offsetWeeks);
+  return Array.from({length:7}, (_,i) => {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    return d;
+  });
+}
+
+function fmtDate(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function fmtWeekLabel(dates) {
+  const a = dates[0], b = dates[6];
+  return `${a.toLocaleDateString('en',{month:'short',day:'numeric'})} – ${b.toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'})}`;
+}
+
+function isoWeek(d) {
+  const tmp = new Date(d);
+  tmp.setDate(tmp.getDate() + 4 - (tmp.getDay()||7));
+  const y = new Date(tmp.getFullYear(),0,1);
+  return `${tmp.getFullYear()}-W${String(Math.ceil(((tmp-y)/86400000+1)/7)).padStart(2,'0')}`;
+}
+
+function calcHours(start, end) {
+  if (!start || !end) return 0;
+  const [sh,sm] = start.split(':').map(Number);
+  const [eh,em] = end.split(':').map(Number);
+  const h = (eh*60+em - sh*60-sm) / 60;
+  return h > 0 ? h : 0;
+}
+
+// ── Toast ────────────────────────────────────────────
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 2400);
+}
+
+// ── Page nav ─────────────────────────────────────────
+const PAGE_META = {
+  dashboard: {title:'Dashboard', sub:'Overview of the upcoming roster'},
+  roster:    {title:'Weekly Roster', sub:'Assign shifts for any week'},
+  requests:  {title:'Day-off Requests', sub:'Approve or decline employee requests'},
+  employees: {title:'Employees', sub:'Manage your team'},
+  settings:  {title:'Settings', sub:'Configure your workspace'}
+};
+
+function goPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('#mobile-nav button').forEach(b => b.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  if (btn) btn.classList.add('on');
+  // Also activate matching mobile nav button
+  const mnav = document.getElementById('mnav-'+id);
+  if (mnav) mnav.classList.add('on');
+  const m = PAGE_META[id];
+  document.getElementById('page-title').textContent = m.title;
+  document.getElementById('page-sub').textContent   = m.sub;
+  currentPage = id;
+  ({dashboard:rDash, roster:rRoster, requests:rRequests, employees:rEmployees, settings:rSettings})[id]?.();
+}
+
+// ── Employee avatar color ────────────────────────────
+function empColor(emp) {
+  const idx = D.employees.indexOf(emp);
+  return COLORS[idx % COLORS.length];
+}
+function initials(emp) {
+  return ((emp.fname||'')[0]||'') + ((emp.lname||'')[0]||'');
+}
+
+// ── Dashboard ────────────────────────────────────────
+function rDash() {
+  const dates = weekDates(rosterWeekOffset);
+  const label = fmtWeekLabel(dates);
+  document.getElementById('dash-week-label').textContent = label;
+  document.getElementById('ph-week').textContent = label;
+  document.getElementById('ph-company').textContent = D.settings.name || 'Roster Pro';
+
+  // Stats
+  const pending = D.requests.filter(r => r.status === 'pending').length;
+  const totalShifts = dates.reduce((s,d) => s + D.employees.filter(e => {
+    const k = e.id+'_'+fmtDate(d);
+    return D.shifts[k]?.type === 'work';
+  }).length, 0);
+  let totalHours = 0;
+  dates.forEach(d => D.employees.forEach(e => {
+    const k = e.id+'_'+fmtDate(d);
+    const sh = D.shifts[k];
+    if (sh?.type==='work') totalHours += calcHours(sh.start, sh.end);
+  }));
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat accent"><div class="stat-label">Employees</div><div class="stat-value">${D.employees.length}</div><div class="stat-sub">active</div></div>
+    <div class="stat green"><div class="stat-label">Shifts scheduled</div><div class="stat-value">${totalShifts}</div><div class="stat-sub">next week</div></div>
+    <div class="stat"><div class="stat-label">Total hours</div><div class="stat-value">${totalHours.toFixed(1)}</div><div class="stat-sub">scheduled</div></div>
+    <div class="stat ${pending>0?'amber':''}"><div class="stat-label">Pending requests</div><div class="stat-value">${pending}</div><div class="stat-sub">awaiting review</div></div>`;
+
+  // Roster snapshot (read-only)
+  buildRosterTable('dash-table', dates, false);
+
+  // Pending requests card
+  const pc = document.getElementById('dash-pending-card');
+  const plist = D.requests.filter(r => r.status==='pending');
+  if (plist.length) {
+    pc.style.display = '';
+    document.getElementById('dash-pending-list').innerHTML = plist.map(r => {
+      const emp = D.employees.find(e=>e.id===r.empId);
+      return `<div class="req-row">
+        <div class="req-info">
+          <div class="req-name">${emp?.fname||'?'} ${emp?.lname||''}</div>
+          <div class="req-detail">${r.type} · ${r.from}${r.to!==r.from?' → '+r.to:''} ${r.notes?'· '+r.notes:''}</div>
+        </div>
+        <div class="req-actions">
+          <button class="btn btn-sm" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,0.2)" onclick="resolveReq('${r.id}','approved')">Approve</button>
+          <button class="btn btn-sm btn-danger" onclick="resolveReq('${r.id}','declined')">Decline</button>
+        </div>
+      </div>`;
+    }).join('');
+  } else { pc.style.display = 'none'; }
+}
+
+// ── Roster ──────────────────────────────────────────
+function rRoster() {
+  const dates = weekDates(rosterWeekOffset);
+  document.getElementById('roster-week-label').textContent = fmtWeekLabel(dates);
+  buildRosterTable('roster-table', dates, true);
+}
+
+function rosterWeekMove(dir) {
+  rosterWeekOffset += dir;
+  rRoster();
+}
+
+function buildRosterTable(tableId, dates, editable) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+
+  if (!D.employees.length) {
+    table.innerHTML = '';
+    table.closest('.card').innerHTML += '';
+    table.parentElement.innerHTML = '<div class="empty"><div class="empty-icon">◉</div><div class="empty-text">No employees yet — add some in the Employees tab.</div></div>';
+    return;
+  }
+
+  // Header
+  let html = '<thead><tr><th style="min-width:150px">Employee</th>';
+  dates.forEach(d => {
+    const isToday = fmtDate(d) === fmtDate(new Date());
+    html += `<th class="day-col" style="${isToday?'color:var(--accent)':''}">${DAYS[d.getDay()]}<br><span style="font-family:var(--mono);font-size:9px;opacity:0.6">${d.getDate()}/${d.getMonth()+1}</span></th>`;
+  });
+  // Weekly hours column
+  html += '<th style="min-width:70px;text-align:right">Hours</th></tr></thead><tbody>';
+
+  D.employees.forEach(emp => {
+    html += `<tr><td class="emp-cell">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="emp-avatar" style="width:28px;height:28px;font-size:10px;background:${empColor(emp)}22;color:${empColor(emp)}">${initials(emp)}</div>
+        <div><div class="emp-cell-name">${emp.fname} ${emp.lname}</div><div class="emp-cell-role">${emp.role||''}</div></div>
+      </div></td>`;
+
+    let weekHours = 0;
+    dates.forEach(d => {
+      const ds = fmtDate(d);
+      const key = emp.id+'_'+ds;
+      const shift = D.shifts[key];
+      const avail = emp.availability?.[DAYS_FULL[d.getDay()].toLowerCase()];
+
+      let cellHtml = '';
+      if (shift) {
+        if (shift.type === 'work') {
+          const h = calcHours(shift.start, shift.end);
+          weekHours += h;
+          cellHtml = `<div class="shift-block shift-work" ${editable?`onclick="openShift('${emp.id}','${ds}')"`:''}><div class="shift-time">${shift.start}–${shift.end}</div><div class="shift-hours">${h>0?h.toFixed(1)+'h':''}</div>${shift.note?`<div style="font-size:9px;opacity:0.6">${shift.note}</div>`:''}</div>`;
+        } else if (shift.type === 'leave') {
+          cellHtml = `<div class="shift-block shift-leave" ${editable?`onclick="openShift('${emp.id}','${ds}')"`:''}><div class="shift-time">Leave</div></div>`;
+        } else {
+          cellHtml = `<div class="shift-block shift-off" ${editable?`onclick="openShift('${emp.id}','${ds}')"`:''}><span>Off</span></div>`;
+        }
+      } else {
+        const hint = avail === 'unavailable' ? 'Unavail.' : '';
+        cellHtml = `<div class="shift-block shift-off" style="${avail==='unavailable'?'opacity:0.4':''}" ${editable?`onclick="openShift('${emp.id}','${ds}')"`:''}><span>${hint||'—'}</span></div>`;
+      }
+      html += `<td class="shift-cell">${cellHtml}</td>`;
+    });
+
+    html += `<td class="hours-cell" style="text-align:right;font-family:var(--mono);font-size:12px;color:${weekHours>0?'var(--accent)':'var(--text3)'}">${weekHours>0?weekHours.toFixed(1)+'h':'—'}</td></tr>`;
+  });
+
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+// ── Shift modal ──────────────────────────────────────
+function openShift(empId, ds) {
+  shiftContext = {empId, date: ds};
+  const emp = D.employees.find(e => e.id === empId);
+  const key = empId+'_'+ds;
+  const shift = D.shifts[key];
+  const d = new Date(ds+'T00:00:00');
+
+  document.getElementById('shift-modal-title').textContent = `${emp.fname} ${emp.lname} — Shift`;
+  document.getElementById('shift-modal-sub').textContent = `${DAYS_FULL[d.getDay()]}, ${d.toLocaleDateString('en',{month:'long',day:'numeric',year:'numeric'})}`;
+
+  const type = shift?.type || 'work';
+  document.getElementById('shift-type').value = type;
+  document.getElementById('shift-start').value = shift?.start || D.settings.defaultStart || '09:00';
+  document.getElementById('shift-end').value   = shift?.end   || D.settings.defaultEnd   || '17:00';
+  document.getElementById('shift-note').value  = shift?.note  || '';
+  toggleShiftType();
+  document.getElementById('modal-shift').classList.remove('hidden');
+}
+
+function toggleShiftType() {
+  const t = document.getElementById('shift-type').value;
+  document.getElementById('shift-time-fields').style.display = t==='work' ? '' : 'none';
+}
+
+function saveShift() {
+  if (!shiftContext) return;
+  const {empId, date} = shiftContext;
+  const key = empId+'_'+date;
+  const type = document.getElementById('shift-type').value;
+  if (type === 'work') {
+    const start = document.getElementById('shift-start').value;
+    const end   = document.getElementById('shift-end').value;
+    if (!start || !end) return toast('Please set start and end times','err');
+    D.shifts[key] = {type, start, end, note: document.getElementById('shift-note').value};
+  } else {
+    D.shifts[key] = {type};
+  }
+  save();
+  closeModal('modal-shift');
+  if (currentPage === 'roster') rRoster();
+  else rDash();
+  toast('Shift saved');
+}
+
+// ── Employees ────────────────────────────────────────
+function rEmployees() {
+  const grid = document.getElementById('emp-grid');
+  if (!D.employees.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◉</div><div class="empty-text">No employees yet. Click "Add Employee" to get started.</div></div>';
+    return;
+  }
+  grid.innerHTML = D.employees.map((emp,i) => {
+    const color = COLORS[i % COLORS.length];
+    const type = emp.employmentType || 'Full-time';
+    const typeClass = {'Full-time':'badge-green','Part-time':'badge-blue','Casual':'badge-amber'}[type] || 'badge-blue';
+    return `<div class="emp-card">
+      <div class="emp-head">
+        <div class="emp-avatar" style="background:${color}22;color:${color}">${initials(emp)}</div>
+        <div>
+          <div class="emp-name">${emp.fname} ${emp.lname}</div>
+          <div class="emp-role">${emp.role || '—'}</div>
+        </div>
+      </div>
+      <div class="emp-meta">
+        <span class="badge ${typeClass}">${type}</span>
+        ${emp.contact ? `<span class="badge badge-blue" style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${emp.contact}">${emp.contact}</span>` : ''}
+      </div>
+      <div class="emp-actions no-print">
+        <button class="btn btn-ghost btn-sm" onclick="openEditEmployee('${emp.id}')">✎ Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="openRequestForEmp('${emp.id}')">+ Request</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${emp.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function availGrid(existing) {
+  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  return days.map(day => {
+    const cur = existing?.[day] || 'available';
+    return `<div class="avail-row">
+      <span class="avail-day">${day.charAt(0).toUpperCase()+day.slice(1)}</span>
+      <div class="avail-status">
+        <button class="avail-btn ${cur==='available'?'sel-avail':''}" onclick="setAvail(this,'${day}','available')">Available</button>
+        <button class="avail-btn ${cur==='unavailable'?'sel-off':''}" onclick="setAvail(this,'${day}','unavailable')">Unavailable</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setAvail(btn, day, val) {
+  const row = btn.closest('.avail-row');
+  row.querySelectorAll('.avail-btn').forEach(b => b.classList.remove('sel-avail','sel-off','sel-leave'));
+  btn.classList.add(val==='available'?'sel-avail':'sel-off');
+  btn.dataset.val = val;
+}
+
+function getAvailData() {
+  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  const result = {};
+  days.forEach(day => {
+    const row = [...document.querySelectorAll('.avail-row')].find(r => r.querySelector('.avail-day')?.textContent.toLowerCase() === day);
+    if (!row) return;
+    const active = [...row.querySelectorAll('.avail-btn')].find(b => b.classList.contains('sel-avail') || b.classList.contains('sel-off'));
+    result[day] = active?.classList.contains('sel-avail') ? 'available' : 'unavailable';
+  });
+  return result;
+}
+
+function openAddEmployee() {
+  editingEmpId = null;
+  document.getElementById('modal-emp-title').textContent = 'Add Employee';
+  document.getElementById('emp-fname').value = '';
+  document.getElementById('emp-lname').value = '';
+  document.getElementById('emp-role').value  = '';
+  document.getElementById('emp-type').value  = 'Full-time';
+  document.getElementById('emp-contact').value = '';
+  document.getElementById('emp-avail-grid').innerHTML = availGrid(null);
+  document.getElementById('modal-emp').classList.remove('hidden');
+}
+
+function openEditEmployee(id) {
+  const emp = D.employees.find(e => e.id===id);
+  if (!emp) return;
+  editingEmpId = id;
+  document.getElementById('modal-emp-title').textContent = 'Edit Employee';
+  document.getElementById('emp-fname').value = emp.fname;
+  document.getElementById('emp-lname').value = emp.lname;
+  document.getElementById('emp-role').value  = emp.role || '';
+  document.getElementById('emp-type').value  = emp.employmentType || 'Full-time';
+  document.getElementById('emp-contact').value = emp.contact || '';
+  document.getElementById('emp-avail-grid').innerHTML = availGrid(emp.availability);
+  document.getElementById('modal-emp').classList.remove('hidden');
+}
+
+function saveEmployee() {
+  const fname = document.getElementById('emp-fname').value.trim();
+  const lname = document.getElementById('emp-lname').value.trim();
+  if (!fname) return toast('First name is required','err');
+
+  const data = {
+    id: editingEmpId || uid(),
+    fname, lname,
+    role: document.getElementById('emp-role').value.trim(),
+    employmentType: document.getElementById('emp-type').value,
+    contact: document.getElementById('emp-contact').value.trim(),
+    availability: getAvailData()
+  };
+
+  if (editingEmpId) {
+    const idx = D.employees.findIndex(e => e.id===editingEmpId);
+    D.employees[idx] = data;
+    toast('Employee updated');
+  } else {
+    D.employees.push(data);
+    toast('Employee added');
+  }
+  save();
+  closeModal('modal-emp');
+  rEmployees();
+  updateReqBadge();
+}
+
+function deleteEmployee(id) {
+  if (!confirm('Remove this employee? Their shift data will also be cleared.')) return;
+  D.employees = D.employees.filter(e => e.id !== id);
+  Object.keys(D.shifts).forEach(k => { if (k.startsWith(id+'_')) delete D.shifts[k]; });
+  save();
+  rEmployees();
+  toast('Employee removed');
+}
+
+// ── Day-off requests ──────────────────────────────────
+function rRequests() {
+  updateReqBadge();
+  const pending  = D.requests.filter(r => r.status==='pending');
+  const resolved = D.requests.filter(r => r.status!=='pending').slice().reverse();
+
+  document.getElementById('req-pending').innerHTML = pending.length
+    ? pending.map(r => reqRowHtml(r, true)).join('')
+    : '<div class="empty" style="padding:20px"><div class="empty-text">No pending requests.</div></div>';
+
+  document.getElementById('req-resolved').innerHTML = resolved.length
+    ? resolved.map(r => reqRowHtml(r, false)).join('')
+    : '<div class="empty" style="padding:20px"><div class="empty-text">No resolved requests yet.</div></div>';
+}
+
+function reqRowHtml(r, showActions) {
+  const emp = D.employees.find(e => e.id===r.empId);
+  const color = emp ? empColor(emp) : '#999';
+  const statusCls = {approved:'badge-green', declined:'badge-red', pending:'badge-amber'}[r.status] || 'badge-amber';
+  return `<div class="req-row">
+    <div class="req-info" style="display:flex;align-items:center;gap:10px">
+      <div class="emp-avatar" style="width:32px;height:32px;font-size:11px;flex-shrink:0;background:${color}22;color:${color}">${emp?initials(emp):'?'}</div>
+      <div>
+        <div class="req-name">${emp?.fname||'Unknown'} ${emp?.lname||''} <span class="badge ${statusCls}" style="margin-left:4px">${r.status}</span></div>
+        <div class="req-detail">${r.type} · ${r.from}${r.to!==r.from?' → '+r.to:''} ${r.notes?'· '+r.notes:''}</div>
+      </div>
+    </div>
+    ${showActions ? `<div class="req-actions">
+      <button class="btn btn-sm" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,0.2)" onclick="resolveReq('${r.id}','approved')">Approve</button>
+      <button class="btn btn-sm btn-danger" onclick="resolveReq('${r.id}','declined')">Decline</button>
+    </div>` : `<button class="btn btn-sm btn-ghost" onclick="deleteReq('${r.id}')">✕</button>`}
+  </div>`;
+}
+
+function resolveReq(id, status) {
+  const req = D.requests.find(r => r.id===id);
+  if (!req) return;
+  req.status = status;
+  // If approved, mark leave on roster
+  if (status === 'approved') {
+    const from = new Date(req.from+'T00:00:00');
+    const to   = new Date(req.to+'T00:00:00');
+    for (let d = new Date(from); d <= to; d.setDate(d.getDate()+1)) {
+      D.shifts[req.empId+'_'+fmtDate(d)] = {type:'leave'};
+    }
+  }
+  save();
+  rRequests();
+  if (currentPage === 'dashboard') rDash();
+  toast(status === 'approved' ? 'Request approved — leave marked on roster' : 'Request declined');
+}
+
+function deleteReq(id) {
+  D.requests = D.requests.filter(r => r.id!==id);
+  save();
+  rRequests();
+}
+
+function updateReqBadge() {
+  const n = D.requests.filter(r=>r.status==='pending').length;
+  const b = document.getElementById('req-badge');
+  b.textContent = n; b.style.display = n ? '' : 'none';
+  // Mobile nav badge
+  const mb = document.getElementById('mnav-badge');
+  if (mb) { mb.textContent = n; mb.style.display = n ? '' : 'none'; }
+}
+
+function openRequestForEmp(empId) {
+  const sel = document.getElementById('req-emp');
+  sel.innerHTML = D.employees.map(e => `<option value="${e.id}" ${e.id===empId?'selected':''}>${e.fname} ${e.lname}</option>`).join('');
+  const today = fmtDate(new Date());
+  document.getElementById('req-from').value = today;
+  document.getElementById('req-to').value   = today;
+  document.getElementById('req-notes').value = '';
+  document.getElementById('modal-request').classList.remove('hidden');
+}
+
+function saveRequest() {
+  const empId = document.getElementById('req-emp').value;
+  const from  = document.getElementById('req-from').value;
+  const to    = document.getElementById('req-to').value;
+  const type  = document.getElementById('req-type').value;
+  if (!empId || !from || !to) return toast('Please fill all fields','err');
+  D.requests.push({id:uid(), empId, from, to, type, notes:document.getElementById('req-notes').value.trim(), status:'pending'});
+  save();
+  closeModal('modal-request');
+  updateReqBadge();
+  toast('Request submitted');
+}
+
+// ── Settings ─────────────────────────────────────────
+function rSettings() {
+  document.getElementById('set-name').value      = D.settings.name || '';
+  document.getElementById('set-start').value     = D.settings.defaultStart || '09:00';
+  document.getElementById('set-end').value       = D.settings.defaultEnd   || '17:00';
+  document.getElementById('set-weekstart').value = D.settings.weekStart ?? 1;
+}
+
+function saveSettings() {
+  D.settings.name         = document.getElementById('set-name').value.trim();
+  D.settings.defaultStart = document.getElementById('set-start').value;
+  D.settings.defaultEnd   = document.getElementById('set-end').value;
+  D.settings.weekStart    = parseInt(document.getElementById('set-weekstart').value);
+  save();
+  updateSbWeek();
+  toast('Settings saved');
+}
+
+// ── Publish ──────────────────────────────────────────
+function publishRoster() {
+  const dates = weekDates(rosterWeekOffset);
+  const wk = isoWeek(dates[0]);
+  D.published[wk] = true;
+  save();
+  toast(`Roster published for ${fmtWeekLabel(dates)}`);
+}
+
+// ── Export PDF ───────────────────────────────────────
+function exportPDF() {
+  const prevPage = currentPage;
+  const dates = weekDates(rosterWeekOffset);
+  document.getElementById('ph-week').textContent    = fmtWeekLabel(dates);
+  document.getElementById('ph-company').textContent = D.settings.name || 'Roster Pro';
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.getElementById('pg-dashboard').classList.add('on');
+
+  // Strip avatar inline background/color so print CSS can cleanly hide them
+  const avatars = document.querySelectorAll('.emp-avatar');
+  const savedStyles = [];
+  avatars.forEach(a => {
+    savedStyles.push({bg: a.style.background, color: a.style.color});
+    a.style.background = 'transparent';
+    a.style.color = 'transparent';
+  });
+
+  setTimeout(() => {
+    window.print();
+    // Restore avatar styles
+    avatars.forEach((a, i) => {
+      a.style.background = savedStyles[i].bg;
+      a.style.color = savedStyles[i].color;
+    });
+    setTimeout(() => {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+      const targetPage = document.getElementById('pg-' + prevPage);
+      if (targetPage) targetPage.classList.add('on');
+    }, 500);
+  }, 100);
+
+  toast('Print dialog opened — choose "Save as PDF"');
+}
+
+// ── Sidebar week label ───────────────────────────────
+function updateSbWeek() {
+  const dates = weekDates(rosterWeekOffset);
+  document.getElementById('sb-week-label').textContent = fmtWeekLabel(dates);
+  document.getElementById('dash-week-label') && (document.getElementById('dash-week-label').textContent = fmtWeekLabel(dates));
+}
+
+// ── Modal helpers ────────────────────────────────────
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-bg').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.add('hidden'); });
+});
+
+// ── Init ─────────────────────────────────────────────
+updateSbWeek();
+rDash();
+updateReqBadge();
+</script>
+</body>
+</html>
