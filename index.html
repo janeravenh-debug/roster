@@ -265,19 +265,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 /* ── Mobile Responsive ──────────────────────────────── */
 @media(max-width:768px){
   /* App layout: stack vertically, bottom nav */
-  .app{flex-direction:column;padding-bottom:64px}
+  .app{flex-direction:column}
   .sidebar{display:none}  /* replaced by bottom nav */
-  .main{flex:1;min-height:0}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 
   /* Topbar compact */
-  .topbar{padding:12px 16px;gap:8px}
+  .topbar{padding:12px 16px;gap:8px;flex-shrink:0}
   .topbar-title{font-size:15px}
   .topbar-sub{display:none}
   .topbar-actions .btn-ghost{display:none} /* hide Export PDF on mobile */
   .btn-primary.btn-sm{padding:7px 12px;font-size:12px}
 
-  /* Pages */
-  .page{padding:16px}
+  /* Pages: fill remaining height and scroll internally */
+  .page{padding:16px 16px 80px;overflow-y:auto;flex:1}
 
   /* Stats: 2 columns */
   .stats{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
